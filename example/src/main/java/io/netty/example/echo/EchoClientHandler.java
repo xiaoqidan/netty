@@ -24,6 +24,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * Handler implementation for the echo client.  It initiates the ping-pong
  * traffic between the echo client and server by sending the first message to
  * the server.
+ * echo客户端的处理程序实现。它通过向服务器发送第一条消息来启动echo客户端和服务器之间的乒乓通信。
  */
 public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
@@ -31,6 +32,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * Creates a client-side handler.
+     * 创建客户端处理程序
      */
     public EchoClientHandler() {
         firstMessage = Unpooled.buffer(EchoClient.SIZE);

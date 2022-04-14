@@ -111,11 +111,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
-    /**
-     * The NIO {@link Selector}.
-     */
+    // 优化后的 选择器
     private Selector selector;
+    // jdk-nio 原生选择器 未包装
     private Selector unwrappedSelector;
+    // 优化了set接口，内部使用数组
     private SelectedSelectionKeySet selectedKeys;
 
     private final SelectorProvider provider;
@@ -129,8 +129,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     //    other value T    when EL is waiting with wakeup scheduled at time T
     private final AtomicLong nextWakeupNanos = new AtomicLong(AWAKE);
 
+    // 默认实现类 DefaultSelectStrategy
     private final SelectStrategy selectStrategy;
 
+    //IO 使用比率
     private volatile int ioRatio = 50;
     private int cancelledKeys;
     private boolean needsToSelectAgain;
@@ -142,7 +144,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 rejectedExecutionHandler);
         this.provider = ObjectUtil.checkNotNull(selectorProvider, "selectorProvider");
         this.selectStrategy = ObjectUtil.checkNotNull(strategy, "selectStrategy");
+        // 第一步
         final SelectorTuple selectorTuple = openSelector();
+        // 第二步
         this.selector = selectorTuple.selector;
         this.unwrappedSelector = selectorTuple.unwrappedSelector;
     }
@@ -173,15 +177,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private SelectorTuple openSelector() {
         final Selector unwrappedSelector;
         try {
-            unwrappedSelector = provider.openSelector();
+            unwrappedSelector = provider.openSelector(); //原生对象获取，与nio同步
         } catch (IOException e) {
             throw new ChannelException("failed to open a new selector", e);
         }
 
-        if (DISABLE_KEY_SET_OPTIMIZATION) {
+        if (DISABLE_KEY_SET_OPTIMIZATION) { //对key的优化，未开启就直接返回
             return new SelectorTuple(unwrappedSelector);
         }
-
+        // 反射创建selectImpl对象，
         Object maybeSelectorImplClass = AccessController.doPrivileged(new PrivilegedAction<Object>() {
             @Override
             public Object run() {
