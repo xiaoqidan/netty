@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * {@link SingleThreadEventLoop} implementation which register the {@link Channel}'s to a
  * {@link Selector} and so does the multi-plexing of these in the event loop.
  *
+ * 源码笔记参考：https://www.jianshu.com/p/9e5e45a23309
  */
 public final class NioEventLoop extends SingleThreadEventLoop {
 
@@ -174,6 +175,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 获取Selector
+     */
     private SelectorTuple openSelector() {
         final Selector unwrappedSelector;
         try {
@@ -211,6 +215,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
 
         final Class<?> selectorImplClass = (Class<?>) maybeSelectorImplClass;
+        // 使用优化后的xxxKeySet 替换JDK种的SelectionKey
         final SelectedSelectionKeySet selectedKeySet = new SelectedSelectionKeySet();
 
         Object maybeException = AccessController.doPrivileged(new PrivilegedAction<Object>() {
@@ -438,6 +443,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 启动运行
+     */
     @Override
     protected void run() {
         int selectCnt = 0;
